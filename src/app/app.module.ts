@@ -30,7 +30,6 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     AngularFireStorageModule,
     HttpClientModule,
     NgbModule,
-    NgxSpinnerModule,
     MainModule,
   ],
   providers:[
