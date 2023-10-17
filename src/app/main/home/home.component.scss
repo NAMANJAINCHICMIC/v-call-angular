@@ -1,0 +1,66 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .navbar-brand:first-child {
+    flex: 0 0 auto;
+}
+
+.navbar .navbar-brand:last-child {
+    flex: 1 1 auto;
+    text-align: center;
+}
+
+.video-container {
+    width: 95%;
+    height: 95%;
+    position: relative;
+}
+
+.remote-video-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: rgb(112, 98, 98);
+}
+
+.local-video-container {
+    background-color: rgb(90, 105, 109);
+    width: 30%;
+    height: 30%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+
+
+
+.button-container {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+button {
+    cursor: pointer;
+}
+
+
+
+.container {
+    height: 90vh;
+    width: 100%;
+    display: block;
+    overflow: hidden;
+}

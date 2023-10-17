@@ -6,6 +6,11 @@
 /out-tsc
 /bazel-out
 
+# dependencies
+/node_modules
+/src/environment/
+package-lock.json
+
 # Node
 /node_modules
 npm-debug.log

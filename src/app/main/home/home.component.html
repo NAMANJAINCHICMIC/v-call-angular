@@ -1,0 +1,25 @@
+
+    
+<div class="container content-page  d-flex flex-column">
+    <nav class="navbar bg-body-tertiary">
+        <div class="container-fluid ">
+          <span class="navbar-brand mb-0 h1">TALK TO STRANGERS</span>
+          <span class="navbar-brand mb-0 h1 text-center">TOMEEGLE</span>
+        </div>
+    </nav>
+    <div class="video-container  ">
+        <div class="remote-video-container ">
+            <video id="remoteVideo" #remoteVideo (click)="toggleVideo()" ></video>
+            <div class="local-video-container ">
+                <video id="localVideo" class="img-fluid" #localVideo (click)="toggleVideo()"></video>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="button-container text-center">
+    <button id="next-button" class="btn btn-primary"  (click)="onNext()">Connect Next Person</button>
+    <button  class="btn btn-primary" *ngIf="recordStart()" (click)="startRecording()">Start Recording</button>
+    <button  class="btn btn-primary" *ngIf="!recordStart()" (click)="stopRecording()">Stop Recording</button>
+</div>
+
