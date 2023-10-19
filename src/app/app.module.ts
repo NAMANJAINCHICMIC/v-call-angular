@@ -13,6 +13,8 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MainModule } from './main/main/main.module';
 import { AlertService } from './services/alert.service';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { SpinnerComponent } from './shared/spinner/spinner.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
@@ -21,6 +23,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     WebcamModule,
     FormsModule,
@@ -31,6 +34,8 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     HttpClientModule,
     NgbModule,
     MainModule,
+    // NgxSpinnerModule.forRoot({ type: 'line-scale-pulse-out-rapid' }),
+    SpinnerComponent
   ],
   providers:[
     AlertService,

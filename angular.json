@@ -32,7 +32,7 @@
             "styles": [
               "node_modules/bootstrap/scss/bootstrap.scss",
               "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/ngx-spinner/animations/ball-8bits.css",
+              "node_modules/ngx-spinner/animations/line-scale-pulse-out-rapid.css",
               "src/styles.scss"
             ],
             "scripts": [
@@ -98,9 +98,7 @@
               "src/assets"
             ],
             "styles": [
-              "node_modules/bootstrap/scss/bootstrap.scss",
-              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
-              "node_modules/ngx-spinner/animations/ball-scale-multiple.css",
+              "node_modules/ngx-spinner/animations/line-scale-pulse-out-rapid.css",
               "src/styles.scss"
             ],
             "scripts": [

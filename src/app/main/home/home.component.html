@@ -4,12 +4,14 @@
     <nav class="navbar bg-body-tertiary">
         <div class="container-fluid ">
           <span class="navbar-brand mb-0 h1">TALK TO STRANGERS</span>
-          <span class="navbar-brand mb-0 h1 text-center">TOMEEGLE</span>
+          <span class="navbar-brand mb-0 h1 text-center">OMEEGLE</span>
         </div>
     </nav>
     <div class="video-container  ">
         <div class="remote-video-container ">
-            <video id="remoteVideo" #remoteVideo (click)="toggleVideo()" ></video>
+            <video id="remoteVideo" #remoteVideo (click)="toggleVideo()" >
+            </video>
+            <app-spinner [fullScreen]="false" ></app-spinner>
             <div class="local-video-container ">
                 <video id="localVideo" class="img-fluid" #localVideo (click)="toggleVideo()"></video>
             </div>
@@ -23,6 +25,3 @@
     <button  class="btn btn-primary" *ngIf="!recordStart()" (click)="stopRecording()">Stop Recording</button>
 </div>
 
-<ngx-spinner bdColor="rgba(0, 0, 0, 0.8)" size="large" color="#fff" type="ball-8bits" [fullScreen]="true">
-    <p style="color: white"> Loading.... </p>
-</ngx-spinner>
