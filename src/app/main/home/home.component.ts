@@ -65,21 +65,10 @@ export class HomeComponent {
     this.websocketClient.connect();
     this.websocketClient.emit("connection");
     this.websocketClient.on("myPeerId", (data: any) => {
-      console.log("myPeerId", data)
+      // console.log("myPeerId", data)
       this.getPeerConnection(data?.peerId);
     })
-    this.websocketClient.on("connection", (socket: any) => {
-      console.log("connection", socket.id); // x8WIv7-mJelg7on_ALbx
-    });
-    
-    // client-side
-    this.websocketClient.on("connect", () => {
-      console.log("connect"); // x8WIv7-mJelg7on_ALbx
-    });
 
-    this.websocketClient.on("disconnect", () => {
-      console.log("disconnect"); // undefined
-    });
     this.websocketClient.on('user-disconnected', (userId:string) =>{
       // console.log('user-disconnected',userId);
       if (this.peers[userId]){
@@ -91,6 +80,7 @@ export class HomeComponent {
 
   initPeerConnection(id: string) {
     if (id) {
+      this.getLocalStream();
       this.currentCall = this.peer.call(id, this.lazyStream);
       if (this.currentCall?.peer) {
         this.currentCall.on('stream', (remoteStream) => {
@@ -138,17 +128,15 @@ export class HomeComponent {
         this.initPeerConnection(res?.nextPeerId)
       });
     });
-    this.peer?.on('connection', (dataConnection) => {
-      console.log('connection', dataConnection);
-    });
     this.peer?.on('call', (call) => {
       if (!this.otherPeerId) {
         call.answer(this.lazyStream);
         call.on('stream', (remoteStream) => {
           if (!this.peerList.length) {
             this.otherPeerId = call.peer;
-            this.currentPeer = call.peerConnection;
+            this.currentPeer?.close();
             this.websocketClient.emit("peerConnected");
+            this.currentPeer = call.peerConnection;
             this.alert.successToast("New Connection Established")
             this.spinnerService.hideSpinner();
             this.streamRemoteVideo(remoteStream);
@@ -189,13 +177,14 @@ export class HomeComponent {
   onNext() {
     // this.alert.warnToast("Trying to Connecting Next Person")
     console.warn("Trying to Connecting Next Person")
-    // this.currentPeer.close();
+    this.currentPeer?.close();
     this.peerList.pop();
     this.otherPeerId = '';
 
-    if (this.currentPeer?.peer) {
-      this.currentPeer.close();
-    }
+    // if (this.currentPeer?.peer) {
+    //   this.currentPeer.close();
+    // }
+    // this.peer.off;
     if (this.currentCall?.peer) {
       this.currentCall.close();
     }
