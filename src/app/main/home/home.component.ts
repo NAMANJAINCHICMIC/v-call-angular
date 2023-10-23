@@ -20,13 +20,15 @@ export class HomeComponent {
   tempShare !: string;
   emailId !: string;
   peerId !: string;
+  otherPeerId?: string = '';
   callReceived = signal("");
   recordStart = signal(true);
+  peers : { [key: string]: any } = new Object({});
   private lazyStream!: MediaStream;
   private remoteLazyStream!: MediaStream;
   private recordLazyStream!: MediaStream;
   currentPeer!: any;
-  currentCall !:MediaConnection;
+  currentCall !: MediaConnection;
   private peerList: Array<any> = [];
   smallScreen = true;
   private socket!: WebSocket;
@@ -93,57 +95,67 @@ export class HomeComponent {
     this.websocketClient.on("disconnect", () => {
       console.log("disconnect"); // undefined
     });
-
+    this.websocketClient.on('user-disconnected', (userId:string) =>{
+      console.log('user-disconnected',userId);
+      if (this.peers[userId]){
+          this.peers[userId].close();
+      }
+      
+  })
   }
 
   initPeerConnection(id: string) {
     console.log(id);
     if (id) {
-      const call = this.peer.call(id, this.lazyStream);
-      call?.on('stream', (remoteStream) => {
-        console.log("hit5", call?.peer);
-        console.log("call peerList", this.peerList);
-        if (!this.peerList.length) {
-          this.spinnerService.hideSpinner();
-          this.alert.successToast("Connection Accepted")
-          this.currentPeer = call;
-          this.streamRemoteVideo(remoteStream);
-          this.peerList.push(call?.peer);
-        }
-      });
-      call?.on('close', () => {
-        console.warn("close2")
-        this.alert.warnToast("Connection Break ")
-        call.close();
-        this.onNext();
-        this.peerList.pop();
-        // this.spinnerService.showSpinner()
-        // //call new peer Id
-        // console.log(this.peer.disconnected)
-        // this.websocketClient.emit("freeToConnect", {}, (res: any) => {
-        //   console.log("freeToConnect res", res);
-        //   this.initPeerConnection(res?.nextPeerId)
+      this.currentCall = this.peer.call(id, this.lazyStream);
+      console.log("hit5", this.currentCall?.peer);
+      if (this.currentCall?.peer) {
 
-        // });
-      });
-      call?.on('error', () => {
-        //call new peer Id
-        this.spinnerService.showSpinner()
-        console.warn("Error2")
-        this.alert.errorToast("Connection Error")
-        this.peer.reconnect();
-        call?.close();
-        this.websocketClient.emit("freeToConnect", {}, (res: any) => {
-          console.log("freeToConnect res", res);
-          this.initPeerConnection(res?.nextPeerId)
-
+        this.currentCall.on('stream', (remoteStream) => {
+          console.log("call peerList", this.currentCall?.peer, this.peerList);
+          if (!this.peerList.length) {
+            this.spinnerService.hideSpinner();
+            this.alert.successToast("Connection Accepted")
+            // this.currentPeer = this.currentCall;
+            this.streamRemoteVideo(remoteStream);
+            this.peerList.push(this.currentCall?.peer);
+            // this.currentCall.emit(myEvent);
+          }
         });
-      });
+        this.currentCall.on('close', () => {
+          console.warn("close2")
+          this.alert.warnToast("Connection Break ")
+          this.currentCall.close();
+          this.onNext();
+          this.peerList.pop();
+          // this.spinnerService.showSpinner()
+          // //call new peer Id
+          // console.log(this.peer.disconnected)
+          // this.websocketClient.emit("freeToConnect", {}, (res: any) => {
+          //   console.log("freeToConnect res", res);
+          //   this.initPeerConnection(res?.nextPeerId)
+
+          // });
+        });
+        this.currentCall.on('error', () => {
+          //call new peer Id
+          this.spinnerService.showSpinner()
+          console.warn("Error2")
+          this.alert.errorToast("Connection Error")
+          this.peer.reconnect();
+          this.currentCall?.close();
+          this.websocketClient.emit("freeToConnect", {}, (res: any) => {
+            console.log("freeToConnect res", res);
+            this.initPeerConnection(res?.nextPeerId)
+
+          });
+        });
+      }
+      this.peers[id] = this.currentCall;
     }
   }
 
   getPeerConnection(socketId: string) {
-    console.log(socketId)
     this.peer = new Peer(socketId, {
       config: environment.iceServersConfig
     });
@@ -154,7 +166,7 @@ export class HomeComponent {
     this.peer?.on('open', (id) => {
       this.peerId = id;
       this.websocketClient.emit("freeToConnect", {}, (res: any) => {
-        console.log("freeToConnect res", res);
+        console.log("freeToConnect onStart", res);
         this.initPeerConnection(res?.nextPeerId)
 
       });
@@ -164,80 +176,100 @@ export class HomeComponent {
 
     });
     this.peer?.on('call', (call) => {
-      console.log("call from", call.peer);
+      // console.log("call from", call.peer);
       this.callReceived.set(call.peer);
       // if (confirm("CALL FROM " + this.callReceived())) {
+      if (!this.otherPeerId) {
         call.answer(this.lazyStream);
         call.on('stream', (remoteStream) => {
-          console.log("remote call", call);
-          console.log("call peerList", this.peerList);
-          // this.currentPeer = call.peerConnection;
+          // console.log("remote call", call);
+          // console.log("call peerList", this.peerList);
           if (!this.peerList.length) {
+            this.otherPeerId = call.peer;
+            this.currentPeer = call.peerConnection;
             this.websocketClient.emit("peerConnected");
             this.alert.successToast("Call Received")
-          this.spinnerService.hideSpinner();
-          this.remoteLazyStream = remoteStream;
-          this.streamRemoteVideo(remoteStream);
-          this.peerList.push(call.peer);
-        }
-      });
-      call.on('close', () => {
-        this.alert.warnToast("Connection Break By Another Person")
-        this.peerList.pop();
-        call.close();
-        this.onNext();
-
-        // console.warn("close")
-        // this.spinnerService.showSpinner()
-        // //call new peer Id
-        // this.websocketClient.emit("freeToConnect", {}, (res: any) => {
-        //   console.log("freeToConnect res", res);
-        //   this.initPeerConnection(res?.nextPeerId)
-
-        // });
-      });
-      call.on('error', () => {
-        //call new peer Id
-        console.warn("Error")
-        call.close();
-        this.spinnerService.showSpinner()
-
-        this.alert.errorToast("Unable To Connect")
-        this.peer.reconnect();
-        this.websocketClient.emit("freeToConnect", {}, (res: any) => {
-          console.log("freeToConnect res", res);
-          this.initPeerConnection(res?.nextPeerId)
-
+            this.spinnerService.hideSpinner();
+            this.remoteLazyStream = remoteStream;
+            this.streamRemoteVideo(remoteStream);
+            this.peerList.push(call.peer);
+          }
         });
-      });
+        call.on('close', () => {
+          this.alert.warnToast("Connection Break By Another Person")
+          this.peerList.pop();
+          console.warn("Connection Break By Another Person")
+          this.otherPeerId = '';
+          call.close();
+          this.onNext();
+
+          // this.spinnerService.showSpinner()
+          // //call new peer Id
+          // this.websocketClient.emit("freeToConnect", {}, (res: any) => {
+          //   console.log("freeToConnect res", res);
+          //   this.initPeerConnection(res?.nextPeerId)
+
+          // });
+        });
+        call.on('error', () => {
+          //call new peer Id
+          console.warn("Error")
+          this.otherPeerId = '';
+          call.close();
+          this.spinnerService.showSpinner()
+
+          this.alert.errorToast("Unable To Connect")
+          this.peer.reconnect();
+          this.websocketClient.emit("freeToConnect", {}, (res: any) => {
+            console.log("freeToConnect res", res);
+            this.initPeerConnection(res?.nextPeerId)
+
+          });
+        });
+       
+      }
     });
   }
 
   streamLocalVideo(stream: any) {
     // stream.getAudioTracks()[0].enabled = false;
-    console.log(this.localVideo.nativeElement)
     try {
       this.localVideo.nativeElement.srcObject = stream;
     } catch (error) {
-      this.alert.errorToast("Connection Error")
-      // this.localVideo.nativeElement.src = URL.createObjectURL(stream);
-      // this.localVideo.nativeElement.srcObject = null;
+      this.alert.errorToast("Connection Error");
     };
     this.localVideo.nativeElement.play();
-    console.log(this.localVideo.nativeElement)
   }
 
   onNext() {
     // this.alert.warnToast("Trying to Connecting Next Person")
-        console.warn("close")
-    this.currentPeer?.close();
+    console.warn("Trying to Connecting Next Person")
+    // this.currentPeer.close();
+    this.peerList.pop();
+    this.otherPeerId = '';
+
+    // console.log("hitClose", this.currentCall.open);
+    if (this.currentPeer?.peer) {
+      console.log("hitClose currentPeer", this.currentPeer?.peer);
+      this.currentPeer.close();
+    }
+    // console.log("hitClose currentCall", this.currentCall?.peer);
+    if (this.currentCall?.peer) {
+      console.log("hitClose currentCall", this.currentCall?.peer);
+      this.currentCall.close();
+    }
+    // this.peer.removeAllListeners();
+    // this.peer._removeConnection(this.peerList?.[0]);
     console.log(this.peer.disconnected)
+    // if (!this.peer.disconnected) {
+    //   this.peer.removeAllListeners();
+    // }
     // this.currentPeer?.remove();
     this.spinnerService.showSpinner();
     this.smallScreen ? this.remoteVideo.nativeElement.srcObject = null : this.localVideo.nativeElement.srcObject = null;
     this.websocketClient.emit("peerDisconnected");
     this.websocketClient.emit("freeToConnect", {}, (res: any) => {
-      console.log("freeToConnect res", res);
+      console.log("freeToConnect onNext", res);
       this.initPeerConnection(res?.nextPeerId)
     });
   }
@@ -312,7 +344,7 @@ export class HomeComponent {
   sendFreetoConnect() {
     this.websocketClient.emit("freeToConnect", {}, (res: any) => {
       console.log("freeToConnect res", res);
-      if(res?.nextPeerId){
+      if (res?.nextPeerId) {
         this.initPeerConnection(res?.nextPeerId)
       }
 
