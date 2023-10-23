@@ -19,7 +19,6 @@ this.toastObj = { icon: '', title: '' };
   toastShow(obj:any) {
     const Toast = Swal.mixin(this.obj);
     Toast.fire(obj);
-    console.log(obj);
 }
 
 successToast(message:any) {
