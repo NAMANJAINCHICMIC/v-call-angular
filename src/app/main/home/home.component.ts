@@ -39,6 +39,7 @@ export class HomeComponent {
     this.spinnerService.showSpinner();
   }
 
+  // video input from user's webcam 
   getLocalStream() {
 
     navigator.mediaDevices.getUserMedia({
@@ -57,6 +58,7 @@ export class HomeComponent {
     });
   }
 
+  // Socket Connection established with Node js using socketIO
   getSocketConnetion() {
     this.websocketClient = io(environment.baseUrl, {
       reconnection: true,
@@ -79,6 +81,7 @@ export class HomeComponent {
   })
   }
 
+  //establish peer connection using peerjs
   getPeerConnection(socketId: string) {
     this.peer = new Peer(socketId, {
       config: environment.iceServersConfig
@@ -135,7 +138,7 @@ export class HomeComponent {
       }
     });
   }
-
+// Connecting person who are available online
   initPeerConnection(id: string) {
     // this.onNext();
     if (id) {
@@ -180,7 +183,7 @@ export class HomeComponent {
     };
     this.localVideo.nativeElement.play();
   }
-
+// connecting next person by breaking connection with connected person
   onNext() {
     // this.alert.warnToast("Trying to Connecting Next Person")
     console.warn("Trying to Connecting Next Person")
@@ -196,7 +199,7 @@ export class HomeComponent {
     // });
     this.sendFreetoConnect();
   }
-
+// toggle small screen with large screen
   toggleVideo() {
     this.smallScreen = !this.smallScreen;
     const toggleStream = this.remoteVideo.nativeElement.srcObject;
@@ -215,7 +218,7 @@ export class HomeComponent {
       this.localVideo.nativeElement.play();
     }
   }
-
+// when pesron is available to connect send request to backend that he is free
   sendFreetoConnect() {
     this.websocketClient.emit("freeToConnect", {}, (res: any) => {
       console.log("freeToConnect res", res);
